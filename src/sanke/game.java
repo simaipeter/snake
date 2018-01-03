@@ -6,6 +6,8 @@
 package sanke;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import search.AbstractState;
 import search.State;
 
@@ -15,10 +17,42 @@ import search.State;
  */
 public class game extends AbstractState {
 
-    public game() {
+    game() {
         
     }
 
+    public game(ArrayList<Integer> palya) {
+        this.palya = palya;
+    }
+    
+    game(game om) {
+        super(om);
+    }
+    
+    game(game om, int x, int y) {
+        super(om);
+        Snake.move(x, y);
+    }
+    ArrayList<Integer> palya;
+    snake Snake = new snake();
+    
+    public boolean isValidMove() {
+        int valid = 1;
+        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) != 1 ) {
+            valid++;
+        }
+        for ( int a = 1; a < Snake.mySnake.size(); a++) {
+            if ( Snake.mySnake.get(0).x == Snake.mySnake.get(a).x && Snake.mySnake.get(0).y == Snake.mySnake.get(a).y ) {
+                valid++;
+            }
+        }
+        if ( valid == 1 ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     
     
     public class snake {
@@ -39,12 +73,21 @@ public class game extends AbstractState {
             this.mySnake.add(new gameObject(mySnake.get(a).x, mySnake.get(a).y));
         }
         
-        
+        public void move(int x, int y) {
+            //0 a fej
+            int HEAD = 0;
+            mySnake.get(HEAD).move(x, y);
+            for ( int a = 1; a < mySnake.size(); a++ ) {
+                mySnake.get(a).move(mySnake.get(a-1).x, mySnake.get(a-1).y);
+            }
+        }
         
         
         public class gameObject {
             int x;
             int y;
+            int prevX;
+            int prevY;
 
             public gameObject() {
                 
@@ -57,6 +100,20 @@ public class game extends AbstractState {
                 this.y = y;
             }
 
+            public int getPrevX() {
+                return prevX;
+            }
+
+            public int getPrevY() {
+                return prevY;
+            }
+
+            public void move(int x, int y) {
+                prevX = this.x;
+                prevY = this.y;
+                this.y = y ;
+                this.x = x;
+            }
             
             @Override
             protected Object clone() throws CloneNotSupportedException {
@@ -73,6 +130,12 @@ public class game extends AbstractState {
                 }
                 return super.equals(obj); //To change body of generated methods, choose Tools | Templates.
             }
+
+            @Override
+            public int hashCode() {
+                return new String(mySnake.toString()).hashCode();
+                 //return super.hashCode(); //To change body of generated methods, choose Tools | Templates.
+            }
             
             
             
@@ -85,7 +148,7 @@ public class game extends AbstractState {
     @Override
     public boolean equals(Object obj) {
         if ( obj.getClass() == game.class && obj != null ) {
-            
+            //return obj.hashCode() == hashCode();
         }
         return super.equals(obj); //To change body of generated methods, choose Tools | Templates.
     }
@@ -107,17 +170,42 @@ public class game extends AbstractState {
 
     @Override
     public Iterable<State> getPossibleMoves() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Set<State> move;
+        move = new HashSet<State>();//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        game state = new game(this, 1, 0);
+        if ( state.isValidMove() ) {
+            move.add(state);
+        }
+        state = new game(this, -1, 0);
+        if ( state.isValidMove() ) {
+            move.add(state);
+        }
+        state = new game(this, 0, 1);
+        if ( state.isValidMove() ) {
+            move.add(state);
+        }
+        state = new game(this, 0, -1);
+        if ( state.isValidMove() ) {
+            move.add(state);
+        }
+        
+        return move;
     }
 
     @Override
     public boolean isSolution() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) != 1 ) {
+            return true;
+        }//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        else {
+            return false;
+        }
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode(); //To change body of generated methods, choose Tools | Templates.
+        return new String(Snake.toString()).hashCode();
+        /*return super.hashCode(); //To change body of generated methods, choose Tools | Templates.*/
     }
     
     
