@@ -67,6 +67,18 @@ public class gui extends javax.swing.JFrame {
             this.gui = gui;
         }
 
+        public int exec() {
+            execute();
+            return 11;
+        }
+        
+        public int e() {
+            this.execute();
+            return 0;
+        }
+        
+        public int 
+        
         @Override
         protected void done() {
             try {
@@ -276,7 +288,10 @@ public class gui extends javax.swing.JFrame {
         }
         else {     
             work.start(this);//work.runStates(start);// TODO add your handling code here:
-            work.run();
+            
+            //work.run();
+            //work.exe();
+            //work.e();//work.exec();
         }
         if ( megoldott != null ) {
             
