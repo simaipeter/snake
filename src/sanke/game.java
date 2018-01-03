@@ -23,6 +23,13 @@ public class game extends AbstractState {
 
     public game(ArrayList<Integer> palya) {
         this.palya = palya;
+        for ( int a = 0; a < palya.size(); a++) {
+            if ( palya.get(a) >= 4 ) {
+                Snake.mySnake.get(palya.get(a)-4).x = a%13;
+                Snake.mySnake.get(palya.get(a)-4).y = a/13;
+            }
+        }
+
     }
     
     game(game om) {
@@ -31,6 +38,8 @@ public class game extends AbstractState {
     
     game(game om, int x, int y) {
         super(om);
+        this.Snake = new snake(om.Snake.mySnake);
+        this.palya = om.palya;
         Snake.move(x, y);
     }
     ArrayList<Integer> palya;
@@ -38,14 +47,37 @@ public class game extends AbstractState {
     
     public boolean isValidMove() {
         int valid = 1;
-        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) != 1 ) {
+        
+        if ( Snake.mySnake.get(0).x > 12 || Snake.mySnake.get(0).x < 0 ) {
             valid++;
+        }
+        
+        if ( Snake.mySnake.get(0).y > 12 || Snake.mySnake.get(0).y < 0 ) {
+            valid++;
+        }
+        
+        if ( Snake.mySnake.get(0).y*13 + Snake.mySnake.get(0).x > 168 ) {
+            valid++;
+        }
+        
+        if ( valid <= 1 ) {
+        
+        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) > 1 &&  palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) != 2  ) {
+            valid++;
+        }
+        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) > 0  ) {
+            if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13)-3 == -1 ) {
+                valid++;
+            }
         }
         for ( int a = 1; a < Snake.mySnake.size(); a++) {
             if ( Snake.mySnake.get(0).x == Snake.mySnake.get(a).x && Snake.mySnake.get(0).y == Snake.mySnake.get(a).y ) {
                 valid++;
             }
         }
+        
+        }
+        
         if ( valid == 1 ) {
             return true;
         }
@@ -62,6 +94,9 @@ public class game extends AbstractState {
         public snake() {
             
             mySnake = new ArrayList<>();
+            for ( int a = 0; a < 4; a++ ) {
+                mySnake.add(new gameObject());
+            }
             
         }
 
@@ -76,9 +111,9 @@ public class game extends AbstractState {
         public void move(int x, int y) {
             //0 a fej
             int HEAD = 0;
-            mySnake.get(HEAD).move(x, y);
+            mySnake.get(HEAD).move(mySnake.get(HEAD).x+x, mySnake.get(HEAD).y+y );
             for ( int a = 1; a < mySnake.size(); a++ ) {
-                mySnake.get(a).move(mySnake.get(a-1).x, mySnake.get(a-1).y);
+                mySnake.get(a).move(mySnake.get(a-1).prevX, mySnake.get(a-1).prevY);
             }
         }
         
@@ -194,7 +229,8 @@ public class game extends AbstractState {
 
     @Override
     public boolean isSolution() {
-        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) != 1 ) {
+        
+        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) > 1 && palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) < 3 ) {
             return true;
         }//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         else {
