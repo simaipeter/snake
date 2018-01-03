@@ -70,7 +70,12 @@ public class gui extends javax.swing.JFrame {
         @Override
         protected void done() {
             try {
-                gui.jTextArea1.setText(get().toString());
+                if ( get() == null ) {
+                    gui.jTextArea1.setText("Sikertelen ");
+                }
+               
+                    gui.megoldott = get();
+                
             } catch (InterruptedException ex) {
                 Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ExecutionException ex) {
@@ -82,6 +87,7 @@ public class gui extends javax.swing.JFrame {
     }
     
     work work;
+    List<State> megoldott;
     
     public void newGame() {
         
@@ -114,6 +120,29 @@ public class gui extends javax.swing.JFrame {
                 a = 0;
             }
         }
+        
+        a = 0;
+        ossz = 0;
+        
+        a = (int) (Math.random() * palya.size()-5);
+        
+        while ( ossz < 3 ) {
+            
+            if ( palya.get(a) == 0 && a%13 < 9 && a%13 > 4 ) {
+                ossz++;
+            }
+            else {
+                ossz = 0;
+            }
+            if ( ossz == 3 ) {
+                palya.set(a-3,4);
+                palya.set(a-2,5);
+                palya.set(a-1,6);
+                palya.set(a,7);
+            }
+            a++;
+        }
+        
         start = new game(palya);
         work = new work();
     }
@@ -127,6 +156,12 @@ public class gui extends javax.swing.JFrame {
             }
             if ( palya.get(a) == 2 ) {
                 blocks.get(a).setBackground(java.awt.Color.yellow);
+            }
+            if ( palya.get(a) == 4 ) {
+                blocks.get(a).setBackground(java.awt.Color.blue);   
+            }
+            if ( palya.get(a) > 4 ) {
+                blocks.get(a).setBackground(java.awt.Color.CYAN);   
             }
         }
     }
@@ -219,9 +254,33 @@ public class gui extends javax.swing.JFrame {
         updatePalya();// TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    int hanyadik = 1;
+    
+    game megoldas;
+    
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        work.start(this);//work.runStates(start);// TODO add your handling code here:
-        work.execute();
+        
+        
+        
+        if ( megoldott != null && megoldott.size() > hanyadik ) {
+            
+            megoldas = (game)megoldott.get(hanyadik);
+            ArrayList<game.snake.gameObject> prevSnake = ((game)megoldott.get(hanyadik-1)).Snake.mySnake;
+            ArrayList<game.snake.gameObject> snake = megoldas.Snake.mySnake;
+            for ( int a = 0; a < snake.size(); a++ ) {
+                palya.set(prevSnake.get(a).x + prevSnake.get(a).y*13,0);
+                palya.set(snake.get(a).x + snake.get(a).y*13,a+4);
+            }
+            updatePalya();
+            hanyadik++;
+        }
+        else {     
+            work.start(this);//work.runStates(start);// TODO add your handling code here:
+            work.run();
+        }
+        if ( megoldott != null ) {
+            
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
     
     /**
