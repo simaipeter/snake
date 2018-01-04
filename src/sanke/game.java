@@ -20,9 +20,12 @@ public class game extends AbstractState {
     game() {
         
     }
-
-    public game(ArrayList<Integer> palya) {
-        this.palya = palya;
+    int hol;
+    gui gui;
+    public game(ArrayList<Integer> palya, gui gui) {
+        this.palya = gui.palya;
+        hol = gui.cel;
+        this.gui = gui;
         for ( int a = 0; a < palya.size(); a++) {
             if ( palya.get(a) >= 4 ) {
                 Snake.mySnake.get(palya.get(a)-4).x = a%13;
@@ -32,15 +35,18 @@ public class game extends AbstractState {
 
     }
     
+    /*game(game om) {
+        super(om);
+    }*/
+    
     game(game om) {
         super(om);
-    }
-    
-    game(game om, int x, int y) {
-        super(om);
+        this.gui = om.gui ;
+ 
         this.Snake = new snake(om.Snake.mySnake);
         this.palya = om.palya;
-        Snake.move(x, y);
+        
+        //Snake.move(x, y);
     }
     ArrayList<Integer> palya;
     snake Snake = new snake();
@@ -48,43 +54,34 @@ public class game extends AbstractState {
     public boolean isValidMove() {
         int valid = 1;
         
-        if ( Snake.mySnake.get(0).x > 12 || Snake.mySnake.get(0).x < 0 ) {
-            valid++;
-        }
-        
-        if ( Snake.mySnake.get(0).y > 12 || Snake.mySnake.get(0).y < 0 ) {
-            valid++;
-        }
-        
-        if ( Snake.mySnake.get(0).y*13 + Snake.mySnake.get(0).x > 168 ) {
-            valid++;
-        }
-        
-        if ( valid <= 1 ) {
-        
-        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) > 1 &&  palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) != 2  ) {
-            valid++;
-        }
-        if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13) > 0  ) {
-            if ( palya.get(Snake.mySnake.get(0).x+Snake.mySnake.get(0).y*13)-3 == -1 ) {
-                valid++;
-            }
-        }
-        for ( int a = 1; a < Snake.mySnake.size(); a++) {
-            if ( Snake.mySnake.get(0).x == Snake.mySnake.get(a).x && Snake.mySnake.get(0).y == Snake.mySnake.get(a).y ) {
-                valid++;
-            }
-        }
-        
-        }
+        //Snake.moveTest(hol, hol)
         
         if ( valid == 1 ) {
             return true;
         }
-        else {
-            return false;
-        }
+        
+        return false;
+        
     }
+    
+    public boolean isValidMove(int vy, int vx) {
+        int valid = 1;
+        
+        valid = valid + Snake.moveTest(vx, vy) - 1;
+        
+
+        
+        if ( valid == 1 ) {
+            gui.updatePalya();
+            gui.updateSnake(this);
+            return true;
+            
+        }
+        
+        return false;
+        
+    }
+    
     
     
     public class snake {
@@ -115,6 +112,30 @@ public class game extends AbstractState {
             for ( int a = 1; a < mySnake.size(); a++ ) {
                 mySnake.get(a).move(mySnake.get(a-1).prevX, mySnake.get(a-1).prevY);
             }
+        }
+        
+        public int moveTest(int x, int y) {
+            int HEAD = 0;
+            mySnake.get(HEAD).move(mySnake.get(HEAD).x+x, mySnake.get(HEAD).y+y );
+            
+            if ( mySnake.get(HEAD).y < 0 || mySnake.get(HEAD).x > 12 || mySnake.get(HEAD).x < 0 || mySnake.get(HEAD).y > 12 ) {
+                return 0;
+            }
+            
+            for ( int a = 1; a < mySnake.size(); a++ ) {
+                if ( mySnake.get(HEAD).y == mySnake.get(a).y && mySnake.get(HEAD).x == mySnake.get(a).x ) {
+                    return 0;
+                }
+            }
+            
+            if ( palya.get(mySnake.get(0).x + mySnake.get(0).y * 13) == 1 ) {
+                return 0;
+            }
+            
+            for ( int a = 1; a < mySnake.size(); a++ ) {
+                mySnake.get(a).move(mySnake.get(a-1).prevX, mySnake.get(a-1).prevY);
+            }
+            return 1;
         }
         
         
@@ -184,6 +205,7 @@ public class game extends AbstractState {
     public boolean equals(Object obj) {
         if ( obj.getClass() == game.class && obj != null ) {
             //return obj.hashCode() == hashCode();
+            return Snake.equals(((game)obj).Snake);
         }
         return super.equals(obj); //To change body of generated methods, choose Tools | Templates.
     }
@@ -195,7 +217,8 @@ public class game extends AbstractState {
 
     @Override
     public double getHeuristic() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        return Math.abs(((Snake.mySnake.get(0).x-(hol%13)) + Snake.mySnake.get(0).y-(hol/13)));//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -207,20 +230,20 @@ public class game extends AbstractState {
     public Iterable<State> getPossibleMoves() {
         Set<State> move;
         move = new HashSet<State>();//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        game state = new game(this, 1, 0);
-        if ( state.isValidMove() ) {
+        game state = new game(this);
+        if ( state.isValidMove(1, 0) ) {
             move.add(state);
         }
-        state = new game(this, -1, 0);
-        if ( state.isValidMove() ) {
+        state = new game(this);
+        if ( state.isValidMove(-1, 0) ) {
             move.add(state);
         }
-        state = new game(this, 0, 1);
-        if ( state.isValidMove() ) {
+        state = new game(this);
+        if ( state.isValidMove(0, 1) ) {
             move.add(state);
         }
-        state = new game(this, 0, -1);
-        if ( state.isValidMove() ) {
+        state = new game(this );
+        if ( state.isValidMove(0,  -1) ) {
             move.add(state);
         }
         

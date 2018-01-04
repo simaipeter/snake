@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
 import search.AbstractSolver;
+import search.BestFirstSolver;
 import search.BreadthFirstSolver;
 import search.DepthFirstSolver;
 import search.State;
@@ -58,7 +59,8 @@ public class gui extends javax.swing.JFrame {
 
         @Override
         protected List<State> doInBackground() throws Exception {
-            DepthFirstSolver p = new DepthFirstSolver();
+            // /*BreadthFirstSolver  p = new BreadthFirstSolver(); */
+            BestFirstSolver p = new BestFirstSolver();
             
             return p.solve(gui.start); //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
@@ -77,7 +79,7 @@ public class gui extends javax.swing.JFrame {
             return 0;
         }
         
-        public int 
+        
         
         @Override
         protected void done() {
@@ -101,10 +103,12 @@ public class gui extends javax.swing.JFrame {
     work work;
     List<State> megoldott;
     
+    int cel = 0;
+    
     public void newGame() {
         
         int ossz = 0;
-        int cel = 0;
+        cel = 0;//int cel = 0;
         int a = 0;
         
         for ( a = 0; a < 13*13; a++)
@@ -122,7 +126,7 @@ public class gui extends javax.swing.JFrame {
                     
                     if ( Math.random() > 0.98 && cel == 0 ) {
                         palya.set(a,2);
-                        cel = 1;
+                        cel = a;
                     }
                 }
                 
@@ -136,26 +140,29 @@ public class gui extends javax.swing.JFrame {
         a = 0;
         ossz = 0;
         
-        a = (int) (Math.random() * palya.size()-5);
+        a = (int) (Math.random() * (palya.size()-5) );
+        
+        ArrayList<Integer> palya1 = new ArrayList<>(palya);
         
         while ( ossz < 3 ) {
-            
-            if ( palya.get(a) == 0 && a%13 < 9 && a%13 > 4 ) {
+            //palya1.add(0);
+            if ( palya1.get(a) == 0 && a%13 < 9 && a%13 > 4 ) {
                 ossz++;
             }
             else {
                 ossz = 0;
             }
             if ( ossz == 3 ) {
-                palya.set(a-3,4);
-                palya.set(a-2,5);
-                palya.set(a-1,6);
-                palya.set(a,7);
+                palya1.set(a-3, 4);
+                palya1.add(a-2, 5);
+                palya1.add(a-1, 6);
+                palya1.add(a, 7);
             }
             a++;
+
         }
         
-        start = new game(palya);
+        start = new game(palya1, this);
         work = new work();
     }
     
@@ -169,12 +176,17 @@ public class gui extends javax.swing.JFrame {
             if ( palya.get(a) == 2 ) {
                 blocks.get(a).setBackground(java.awt.Color.yellow);
             }
-            if ( palya.get(a) == 4 ) {
-                blocks.get(a).setBackground(java.awt.Color.blue);   
-            }
-            if ( palya.get(a) > 4 ) {
-                blocks.get(a).setBackground(java.awt.Color.CYAN);   
-            }
+            
+        }
+    }
+    
+    
+    public void updateSnake(game e) {
+
+        blocks.get((e.Snake.mySnake.get(0).x+(e.Snake.mySnake.get(0).y*13))).setBackground(java.awt.Color.blue);
+        for ( int a = 1; a < e.Snake.mySnake.size(); a++ ) {
+            blocks.get(e.Snake.mySnake.get(a).x+e.Snake.mySnake.get(a).y*13).setBackground(java.awt.Color.CYAN);
+
         }
     }
 
@@ -263,7 +275,7 @@ public class gui extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         newGame();
-        updatePalya();// TODO add your handling code here:
+        updatePalya();  updateSnake(start); // TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     int hanyadik = 1;
@@ -283,15 +295,15 @@ public class gui extends javax.swing.JFrame {
                 palya.set(prevSnake.get(a).x + prevSnake.get(a).y*13,0);
                 palya.set(snake.get(a).x + snake.get(a).y*13,a+4);
             }
-            updatePalya();
+            updatePalya(); updateSnake(start); 
             hanyadik++;
         }
-        else {     
-            work.start(this);//work.runStates(start);// TODO add your handling code here:
+        else  {     
+            work.start(this); work.exec();//work.runStates(start);// TODO add your handling code here:
             
             //work.run();
             //work.exe();
-            //work.e();//work.exec();
+            //work.run( );//work.e();//work.exec();
         }
         if ( megoldott != null ) {
             
